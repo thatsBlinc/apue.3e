@@ -1,18 +1,17 @@
-#include "apue.h"
 #include <pthread.h>
 
 void *
 thr_fn1(void *arg)
 {
 	printf("thread 1 returning\n");
-	return((void *)1);
+	return((void *)123); //rval_ptr is void* type
 }
 
 void *
 thr_fn2(void *arg)
 {
 	printf("thread 2 exiting\n");
-	pthread_exit((void *)2);
+	pthread_exit((void *)999);
 }
 
 int
@@ -28,7 +27,7 @@ main(void)
 	err = pthread_create(&tid2, NULL, thr_fn2, NULL);
 	if (err != 0)
 		err_exit(err, "can't create thread 2");
-	err = pthread_join(tid1, &tret);
+	err = pthread_join(tid1, &tret);//wait tid1 to terminate, and obtain it's returned code
 	if (err != 0)
 		err_exit(err, "can't join with thread 1");
 	printf("thread 1 exit code %ld\n", (long)tret);
