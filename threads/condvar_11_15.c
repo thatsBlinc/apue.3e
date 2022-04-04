@@ -18,11 +18,14 @@ process_msg(void)
 
 	for (;;) {
 		pthread_mutex_lock(&qlock);
+		//qlock is released when enter
 		while (workq == NULL)
 			pthread_cond_wait(&qready, &qlock);
 		mp = workq;
 		workq = mp->m_next;
+		printf("processing msg: %x\n",mp);
 		pthread_mutex_unlock(&qlock);
+		//qlock locked up again when exit
 		/* now process the message mp */
 	}
 }
@@ -33,6 +36,13 @@ enqueue_msg(struct msg *mp)
 	pthread_mutex_lock(&qlock);
 	mp->m_next = workq;
 	workq = mp;
+	printf("enqueueing msg: %x\n",mp);
 	pthread_mutex_unlock(&qlock);
 	pthread_cond_signal(&qready);
+}
+
+
+int main(){
+	
+
 }
