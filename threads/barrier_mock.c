@@ -9,8 +9,8 @@
 // A heap has current size and array of elements
 
 pthread_barrier_t b;
-#define NTHR   1
-#define NUMNUM 8000000L
+#define NTHR   8
+#define NUMNUM 32000000L
 #define TNUM   NUMNUM/NTHR
 long arr[NUMNUM];
 long snums[NUMNUM];
@@ -108,8 +108,23 @@ void printArray(long* arr, long size)
 void *
 thr_fn(void *arg)
 {
+    pthread_t tid;
+    tid = pthread_self();
+    struct timeval  start, end;
+    long long       startusec, endusec;
+    double          elapsed;
+
+    gettimeofday(&start, NULL);
+
     long    idx = (long)arg;
     heapSort(&arr[idx], TNUM);
+
+    gettimeofday(&end, NULL);
+    startusec = start.tv_sec * 1000000 + start.tv_usec;
+    endusec = end.tv_sec * 1000000 + end.tv_usec;
+    elapsed = (double)(endusec - startusec) / 1000000.0;
+    printf("tid %lu (0x%lx) - elapsed time: %.4f\n",
+    (unsigned long)tid, (unsigned long)tid, elapsed);
     pthread_barrier_wait(&b);
 
     /*
@@ -159,10 +174,10 @@ int main(int argc, char *argv[])
     double          elapsed;
     pthread_t       tid;
     int             err;
-    
-    srandom(1);
+    srand(time(0));
+    //srandom(1);
     for (long i = 0; i < NUMNUM; i++)
-        arr[i] = random();
+        arr[i] = rand();
 
     long size = sizeof(arr)/sizeof(arr[0]);
     gettimeofday(&start, NULL);
@@ -173,15 +188,15 @@ int main(int argc, char *argv[])
         if (err != 0)
             err_exit(err, "can't create thread");
     }
-    //heapSort(arr, size);
     pthread_barrier_wait(&b);
+    printf("start merging...\n");
     merge();
     gettimeofday(&end, NULL);
     startusec = start.tv_sec * 1000000 + start.tv_usec;
     endusec = end.tv_sec * 1000000 + end.tv_usec;
     elapsed = (double)(endusec - startusec) / 1000000.0;
     
-    printf("\nSorted array is \n");
+    printf("\nSorted array is (first %d nums)\n",100);
     printArray(snums, 100);
     printf("\n");
     
