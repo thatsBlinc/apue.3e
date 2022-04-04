@@ -1,0 +1,63 @@
+#线程创建
+int pthread_create(&tid, void*(*start_rtn)(void*), void * arg);
+//tid:创建的线程id, start_rtn/arg:启动例程，即在新建线程中运行的函数,及参数
+void pthread_exit(void *rval_ptr);
+//如果是在main种调用，此函数等待其它线程中止后中止main
+//进程中的其它线程可以通过调用pthread_join函数访问rval_ptr
+//rval_ptr是tid线程退出时携带的“数据”(可以是结构体信息，启动例程的返回码等)
+
+int pthread_cancel(pthread_t tid);
+int pthread_join(tid, void** rval_ptr);
+//作用：等待tid线程结束
+//*rval_ptr表示tid线程的终止状态;若不关心终止状态，可以把rval_ptr设置为NULL
+
+
+
+#互斥量
+int pthread_mutex_init(pthread_mutex_t *restrict mutex, const pthread_mutexattr_t *restrict attr);
+int pthread_mutex_destroy(pthread_mutex_t *mutex);
+//初始化和销毁 
+
+int pthread_mutex_lock(pthread_mutex_t *mutex);
+int pthread_mutex_trylock(pthread_mutex_t *mutex);
+int pthread_mutex_unlock(pthread_mutex_t *mutex);
+//pthread_mutex_lock和pthread_mutex_trylock区别：在等待进入critical section时，
+lock会一直阻塞，trylock尝试lock失败后会返回
+
+int pthread_mutex_timedlock(pthread_mutex_t *restrict mutex,const struct timespec *restrict tsptr);
+//在设置的时间内不能获得锁，则返回
+
+
+
+#读写锁
+int pthread_rwlock_rdlock(pthread_rwlock_t *rwlock);//读模式锁，多个读线程可以共用
+int pthread_rwlock_wrlock(pthread_rwlock_t *rwlock);//写模式锁，最多一个线程可以进入
+int pthread_rwlock_unlock(pthread_rwlock_t *rwlock);//未锁定状态
+//以上三种状态互斥
+
+int pthread_rwlock_tryrdlock(pthread_rwlock_t *rwlock);
+int pthread_rwlock_trywrlock(pthread_rwlock_t *rwlock);
+int pthread_rwlock_timedrdlock(pthread_rwlock_t *restrict rwlock,
+const struct timespec *restrict tsptr);
+int pthread_rwlock_timedwrlock(pthread_rwlock_t *restrict rwlock,
+const struct timespec *restrict tsptr);
+
+
+#屏障
+int pthread_barrier_init(pthread_barrier_t *restrict barrier,
+const pthread_barrierattr_t *restrict attr,unsigned int count);
+//初始化屏障： count指定线程的个数，未达到count之前，到达屏障的线程进入休眠,最后一个到达后，所有线程
+都会唤醒
+int pthread_barrier_destroy(pthread_barrier_t *barrier);
+
+int pthread_barrier_wait(pthread_barrier_t *barrier);
+
+
+习题11.4:
+情景1：unlock互斥量后再signal或broadcase	缺点： 条件或许已经改变，
+等待条件的线程中需要重新检查（如condvar.c中所示）
+情景2：signal或broadcast后再unlock	 	缺点： 所有待待线程都会block，造成系统开销
+
+11.5:
+eg1:barrier_mock.c
+eg2:https://lloydrochester.com/post/c/pthread-barrier-example/#:~:text=Barrier%20Pthread%20Example%3A%20Ladies%20First%21%201%20We%20have,Men%20will%20eat%20and%20the%20program%20will%20end
