@@ -1,6 +1,10 @@
 #include "apue.h"
 #include <pthread.h>
 
+
+
+
+
 int
 makethread(void *(*fn)(void *), void *arg)
 {
@@ -8,6 +12,8 @@ makethread(void *(*fn)(void *), void *arg)
 	pthread_t		tid;
 	pthread_attr_t	attr;
 
+
+#ifdef DETACH
 	err = pthread_attr_init(&attr);
 	if (err != 0)
 		return(err);
@@ -16,4 +22,12 @@ makethread(void *(*fn)(void *), void *arg)
 		err = pthread_create(&tid, &attr, fn, arg);
 	pthread_attr_destroy(&attr);
 	return(err);
+#else
+
+	err = pthread_create(&tid, NULL, fn, arg);
+	if (err != 0)
+		return(err);
+	err=pthread_join(tid,ret);
+	return(err);
+#endif
 }
