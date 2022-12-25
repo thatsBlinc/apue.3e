@@ -11,6 +11,7 @@ int pthread_join(tid, void** rval_ptr);
 //作用：等待tid线程结束
 //*rval_ptr表示tid线程的终止状态;若不关心终止状态，可以把rval_ptr设置为NULL
 
+int pthread_detach(pthread_t tid); //discussed in Chap12
 
 
 #互斥量
