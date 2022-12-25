@@ -5,7 +5,7 @@
 using namespace std;
 
 void printAdd(void* addr){
-   printf("==> 0x%x\n",(unsigned long)addr);
+   printf("==> 0x%lx\n",(unsigned long)addr);
    return;
 }
 
@@ -22,10 +22,16 @@ private:
    node(int d){}
 };
 
-node* nodeFactory(void* addr,int data,unsigned long next){
+node* nodeFactory(void* addr, size_t size, int data,unsigned long next){
    printAdd(addr);
-   if(addr==NULL)
+   if(addr==NULL){
+      cout<<"[nodeFactory]: invalid addr"<<endl;
       return NULL;
+   }
+   if(size!=sizeof(node)){
+      cout<<"[nodeFactory]:  wrong size"<<endl;
+      return NULL;
+   }
    node* ptr=(node*)addr;
    ptr->data=data;
    ptr->next=(node*)next;
@@ -34,7 +40,7 @@ node* nodeFactory(void* addr,int data,unsigned long next){
 
 int main() {
    void* addr = malloc(sizeof(node));
-   cout<<"before casting!"<<endl;
+   cout<<"[main] before casting!"<<endl;
    printAdd(addr);
    /*
    node* ptr=(node*)addr;
@@ -44,8 +50,8 @@ int main() {
    printAdd(addr);
    */
 
-   cout<<"factory mode:"<<endl;
-   auto ptr = nodeFactory(addr,123,0x123);
+   cout<<"[main] factory mode:"<<endl;
+   auto ptr = nodeFactory(addr,16,123,0x123);
    if(ptr!=NULL)
       ptr->show();   
    return 0;
